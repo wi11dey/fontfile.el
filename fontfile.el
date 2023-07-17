@@ -25,8 +25,6 @@
 ;; Generate README:
 ;;; Commentary:
 
-Pure-Elisp font-file reader
-
 ;;; Code:
 
 ;; TODO copy README.org into Commentary.
@@ -45,45 +43,45 @@ Pure-Elisp font-file reader
 
 (defun fontfile--read-uint16 ()
   ""
-  (logior (lsh (fontfile--read-uint8) 8)
+  (logior (ash (fontfile--read-uint8) 8)
           (fontfile--read-uint8)))
 
 (defun fontfile--read-int16 ()
   ""
   (let ((result (fontfile--read-uint16)))
-    (if (/= (logand result (eval-when-compile (lsh 1 15))) 0)
-        (- result (eval-when-compile (lsh 1 16)))
+    (if (/= (logand result (eval-when-compile (ash 1 15))) 0)
+        (- result (eval-when-compile (ash 1 16)))
       result)))
 
 ;; Requires bignum support (added in Emacs 27.1)
 (defun fontfile--read-uint32 ()
   ""
-  (logior (lsh (fontfile--read-uint16) 16)
+  (logior (ash (fontfile--read-uint16) 16)
 	  (fontfile--read-uint16)))
 
 (defun fontfile--read-int32 ()
   ""
   (let ((result (fontfile--read-uint32)))
-    (if (/= (logand result (eval-when-compile (lsh 1 31))) 0)
-	(- result (eval-when-compile (lsh 1 32)))
+    (if (/= (logand result (eval-when-compile (ash 1 31))) 0)
+	(- result (eval-when-compile (ash 1 32)))
       result)))
 
 (defun fontfile--read-uint64 ()
-  (logior (lsh (fontfile--read-uint32) 32)
+  (logior (ash (fontfile--read-uint32) 32)
 	  (fontfile--read-uint32)))
 
 (defun fontfile--read-int64 ()
   (let ((result (fontfile--read-uint64)))
-    (if (/= (logand result (eval-when-compile (lsh 1 63))) 0)
-	(- result (eval-when-compile (lsh 1 64)))
+    (if (/= (logand result (eval-when-compile (ash 1 63))) 0)
+	(- result (eval-when-compile (ash 1 64)))
       result)))
 
 (defun fontfile--read-2dot14 ()
   ""
-  (/ (float (fontfile--read-int16)) (eval-when-compile (lsh 1 14))))
+  (/ (float (fontfile--read-int16)) (eval-when-compile (ash 1 14))))
 
 (defun fontfile--read-fixed ()
-  (/ (float (fontfile--read-int32)) (eval-when-compile (lsh 1 16))))
+  (/ (float (fontfile--read-int32)) (eval-when-compile (ash 1 16))))
 
 (defun fontfile--read-string (length)
   ""
@@ -188,12 +186,12 @@ Pure-Elisp font-file reader
       (fontfile--read-int16))))
 
 (defun fontfile--ttf--read-simple-glyph (num-contours)
-  (let ((on-curve  (eval-when-compile (lsh 1 0)))
-	(x-is-byte (eval-when-compile (lsh 1 1)))
-	(y-is-byte (eval-when-compile (lsh 1 2)))
-	(repeat    (eval-when-compile (lsh 1 3)))
-	(x-delta   (eval-when-compile (lsh 1 4)))
-	(y-delta   (eval-when-compile (lsh 1 5)))
+  (let ((on-curve  (eval-when-compile (ash 1 0)))
+	(x-is-byte (eval-when-compile (ash 1 1)))
+	(y-is-byte (eval-when-compile (ash 1 2)))
+	(repeat    (eval-when-compile (ash 1 3)))
+	(x-delta   (eval-when-compile (ash 1 4)))
+	(y-delta   (eval-when-compile (ash 1 5)))
         (contour-ends (make-vector num-contours 0))
         num-points
 	points
@@ -277,16 +275,16 @@ Pure-Elisp font-file reader
             midheight midheight)))
 
 (defun fontfile--ttf-read-compound-glyph (fontfile)
-  (let ((arg-1-and-2-are-words    (eval-when-compile (lsh 1  0)))
-	(args-are-xy-values       (eval-when-compile (lsh 1  1)))
-	(round-xy-to-grid         (eval-when-compile (lsh 1  2)))
-	(we-have-a-scale          (eval-when-compile (lsh 1  3)))
-	(more-components          (eval-when-compile (lsh 1  5)))
-	(we-have-an-x-and-y-scale (eval-when-compile (lsh 1  6)))
-	(we-have-a-two-by-two     (eval-when-compile (lsh 1  7)))
-	(we-have-instructions     (eval-when-compile (lsh 1  8)))
-	(use-my-metrics           (eval-when-compile (lsh 1  9)))
-	(overlap-component        (eval-when-compile (lsh 1 10)))
+  (let ((arg-1-and-2-are-words    (eval-when-compile (ash 1  0)))
+	(args-are-xy-values       (eval-when-compile (ash 1  1)))
+	(round-xy-to-grid         (eval-when-compile (ash 1  2)))
+	(we-have-a-scale          (eval-when-compile (ash 1  3)))
+	(more-components          (eval-when-compile (ash 1  5)))
+	(we-have-an-x-and-y-scale (eval-when-compile (ash 1  6)))
+	(we-have-a-two-by-two     (eval-when-compile (ash 1  7)))
+	(we-have-instructions     (eval-when-compile (ash 1  8)))
+	(use-my-metrics           (eval-when-compile (ash 1  9)))
+	(overlap-component        (eval-when-compile (ash 1 10)))
         flag
 	arg1 arg2
 	glyph-index
@@ -348,7 +346,7 @@ Pure-Elisp font-file reader
 
 (defun fontfile--ttf-read-char-table-segmap4 (char-table)
   (let* ((seg-count-x2 (fontfile--read-uint16))
-	 (seg-count (lsh seg-count-x2 -1))
+	 (seg-count (ash seg-count-x2 -1))
 	 (search-range (fontfile--read-uint16))
 	 (entry-selector (fontfile--read-uint16))
 	 (range-shift (fontfile--read-uint16))
@@ -374,7 +372,7 @@ Pure-Elisp font-file reader
 				    (% (+ (aref id-deltas i) j)
 				       65536)
 				  (save-excursion
-				    (forward-char (% (+ (lsh id-range-offset -1)
+				    (forward-char (% (+ (ash id-range-offset -1)
 							(- j (aref start-codes i))
 							-1)
 						     65536))
