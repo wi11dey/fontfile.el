@@ -485,3 +485,5 @@
   string)
 
 (provide 'fontfile)
+
+;;; fontfile.el ends here
